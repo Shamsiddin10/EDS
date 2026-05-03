@@ -37,7 +37,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = (userData: User) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
-    router.push("/dashboard");
+    
+    // Redirect based on role
+    switch (userData.role) {
+      case "STUDENT":
+        router.push("/dashboard/student/courses");
+        break;
+      case "TEACHER":
+        router.push("/dashboard/teacher/classes");
+        break;
+      case "DIRECTOR":
+        router.push("/dashboard/director/approvals");
+        break;
+      case "ADMIN":
+      case "SUPER_ADMIN":
+        router.push("/dashboard/admin/users");
+        break;
+      default:
+        router.push("/dashboard");
+    }
   };
 
   const logout = () => {
