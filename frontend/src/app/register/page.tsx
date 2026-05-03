@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../../context/LanguageContext";
 import LanguageSelector from "../../components/LanguageSelector";
+import { API_URL } from "../../lib/api";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -27,7 +28,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

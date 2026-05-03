@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { API_URL } from "../../lib/api";
 
 function VerifyContent() {
   const [code, setCode] = useState("");
@@ -22,7 +23,7 @@ function VerifyContent() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verify", {
+      const res = await fetch(`${API_URL}/api/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, code }),
