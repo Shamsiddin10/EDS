@@ -80,3 +80,78 @@ export const deleteUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Get all teachers
+// @route   GET /api/admin/teachers
+// @access  Private/Director/Admin/SuperAdmin
+export const getTeachers = async (req: Request, res: Response) => {
+  try {
+    const teachers = await prisma.user.findMany({
+      where: { role: 'TEACHER' },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        phoneNumber: true,
+        coursesTaught: {
+          select: { id: true, title: true }
+        }
+      }
+    });
+    res.json(teachers);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all students
+// @route   GET /api/admin/students
+// @access  Private/Director/Admin/SuperAdmin
+export const getStudents = async (req: Request, res: Response) => {
+  try {
+    const students = await prisma.user.findMany({
+      where: { role: 'STUDENT' },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        phoneNumber: true,
+        enrollments: {
+          include: { course: true }
+        }
+      }
+    });
+    res.json(students);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get attendance report
+// @route   GET /api/admin/attendance
+// @access  Private/Director/Admin/SuperAdmin
+export const getAttendanceReport = async (req: Request, res: Response) => {
+  try {
+    const { date } = req.query;
+    const searchDate = date ? new Date(date as string) : new Date();
+    searchDate.setHours(0, 0, 0, 0);
+
+    const attendances = await prisma.attendance.findMany({
+      where: {
+        date: {
+          gte: searchDate,
+          lt: new Date(searchDate.getTime() + 24 * 60 * 60 * 1000)
+        }
+      },
+      include: {
+        user: {
+          select: { firstName: true, lastName: true, role: true }
+        }
+      }
+    });
+
+    res.json(attendances);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};

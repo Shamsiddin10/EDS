@@ -17,6 +17,9 @@ interface AuthContextType {
   login: (userData: User) => void;
   logout: () => void;
   loading: boolean;
+  attendanceMarked: boolean;
+  setAttendanceMarked: (marked: boolean) => void;
+  checkAttendance: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,21 +27,45 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [attendanceMarked, setAttendanceMarked] = useState(false);
   const router = useRouter();
+
+  const checkAttendance = async () => {
+    if (!user) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/attendance/status`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      const data = await res.json();
+      setAttendanceMarked(data.hasCheckedIn);
+    } catch (error) {
+      console.error("Attendance check failed:", error);
+    }
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      checkAttendance();
+    }
+  }, [user]);
 
   const login = (userData: User) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
     
     // Redirect based on role
+    // ... rest of logic
     switch (userData.role) {
       case "STUDENT":
         router.push("/dashboard/student/courses");
@@ -65,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, attendanceMarked, setAttendanceMarked, checkAttendance }}>
       {children}
     </AuthContext.Provider>
   );

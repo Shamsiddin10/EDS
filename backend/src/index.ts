@@ -8,6 +8,10 @@ import lessonRoutes from './routes/lesson.routes';
 import assignmentRoutes from './routes/assignment.routes';
 import gradeRoutes from './routes/grade.routes';
 import adminRoutes from './routes/admin.routes';
+import attendanceRoutes from './routes/attendance.routes';
+import quizRoutes from './routes/quiz.routes';
+import { checkAttendanceMarked } from './middleware/attendance.middleware';
+import { protect } from './middleware/auth.middleware';
 
 dotenv.config();
 
@@ -21,11 +25,15 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/api/courses', courseRoutes);
-app.use('/api/lessons', lessonRoutes);
-app.use('/api/assignments', assignmentRoutes);
-app.use('/api/grades', gradeRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/attendance', attendanceRoutes);
+
+// Protected routes that require attendance
+app.use('/api/courses', protect, checkAttendanceMarked, courseRoutes);
+app.use('/api/lessons', protect, checkAttendanceMarked, lessonRoutes);
+app.use('/api/assignments', protect, checkAttendanceMarked, assignmentRoutes);
+app.use('/api/grades', protect, checkAttendanceMarked, gradeRoutes);
+app.use('/api/quizzes', protect, checkAttendanceMarked, quizRoutes);
+app.use('/api/admin', protect, checkAttendanceMarked, adminRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

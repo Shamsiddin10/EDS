@@ -42,12 +42,19 @@ export default function DashboardLayout({
         return [
           { name: "My Classes", path: "/dashboard/teacher/classes" },
           { name: "Create Lesson", path: "/dashboard/teacher/lessons" },
+          { name: "Quizzes", path: "/dashboard/teacher/quizzes" },
           { name: "Grade Students", path: "/dashboard/teacher/grading" },
+        ];
+      case "DIRECTOR":
+        return [
+          { name: "Monitoring", path: "/dashboard/director/monitoring" },
+          { name: "Course Approvals", path: "/dashboard/director/approvals" },
         ];
       case "ADMIN":
       case "SUPER_ADMIN":
         return [
           { name: "User Management", path: "/dashboard/admin/users" },
+          { name: "Monitoring", path: "/dashboard/director/monitoring" }, // Admins can also monitor
           { name: "System Settings", path: "/dashboard/admin/settings" },
         ];
       default:

@@ -37,6 +37,62 @@ model User {
   // Student specific relations
   enrollments      Enrollment[]
   submissions      Submission[]
+  attendances      Attendance[]
+  quizResults      QuizResult[]
+
+  // Creator relations
+  createdQuizzes   Quiz[]            @relation("QuizCreator")
+}
+
+model Attendance {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @default(now())
+  status    Boolean  @default(true) // true = present (keldi)
+  
+  @@unique([userId, date])
+}
+
+model Quiz {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  courseId    String
+  course      Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacherId   String
+  teacher     User       @relation("QuizCreator", fields: [teacherId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  questions   Question[]
+  results     QuizResult[]
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  text      String
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options   Option[]
+}
+
+model Option {
+  id         String   @id @default(uuid())
+  text       String
+  isCorrect  Boolean  @default(false)
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model QuizResult {
+  id        String   @id @default(uuid())
+  score     Float
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 model VerificationCode {
@@ -60,6 +116,7 @@ model Course {
 
   lessons     Lesson[]
   enrollments Enrollment[]
+  quizzes     Quiz[]
 }
 
 model Enrollment {
